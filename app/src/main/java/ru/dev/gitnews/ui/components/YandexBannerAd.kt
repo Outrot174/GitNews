@@ -54,24 +54,30 @@ fun YandexBannerAd(
         AndroidView(
             modifier = Modifier.fillMaxWidth(),
             factory = { ctx ->
-                BannerAdView(ctx).apply {
-                    setAdUnitId(BuildConfig.YANDEX_BANNER_ID)
-                    setAdSize(BannerAdSize.stickySize(ctx, screenWidthDp))
-                    setBannerAdEventListener(object : BannerAdEventListener {
-                        override fun onAdLoaded() {
-                            isAdVisible = true
-                        }
+                try {
+                    BannerAdView(ctx).apply {
+                        setAdUnitId(BuildConfig.YANDEX_BANNER_ID)
+                        setAdSize(BannerAdSize.stickySize(ctx, screenWidthDp.coerceAtLeast(320)))
+                        setBannerAdEventListener(object : BannerAdEventListener {
+                            override fun onAdLoaded() {
+                                isAdVisible = true
+                            }
 
-                        override fun onAdFailedToLoad(error: AdRequestError) {
-                            isAdVisible = false
-                        }
+                            override fun onAdFailedToLoad(error: AdRequestError) {
+                                isAdVisible = false
+                            }
 
-                        override fun onAdClicked() {}
-                        override fun onLeftApplication() {}
-                        override fun onReturnedToApplication() {}
-                        override fun onImpression(impressionData: ImpressionData?) {}
-                    })
-                    loadAd(AdRequest.Builder().build())
+                            override fun onAdClicked() {}
+                            override fun onLeftApplication() {}
+                            override fun onReturnedToApplication() {}
+                            override fun onImpression(impressionData: ImpressionData?) {}
+                        })
+                        loadAd(AdRequest.Builder().build())
+                    }
+                } catch (t: Throwable) {
+                    android.util.Log.e("YandexBannerAd", "BannerAdView creation failed", t)
+                    isAdVisible = false
+                    android.view.View(ctx)
                 }
             }
         )

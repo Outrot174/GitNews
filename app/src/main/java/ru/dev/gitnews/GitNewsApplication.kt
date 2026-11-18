@@ -18,15 +18,20 @@ class GitNewsApplication : Application() {
         super.onCreate()
         setupCrashHandler()
         container = DefaultAppContainer(this)
-        container.releaseTrackerRepository.schedulePeriodicCheck(
-            container.releaseTrackerRepository.isNotificationsEnabled()
-        )
+        try {
+            container.releaseTrackerRepository.schedulePeriodicCheck(
+                container.releaseTrackerRepository.isNotificationsEnabled()
+            )
+        } catch (t: Throwable) {
+            Log.e("GitNewsApp", "Release check scheduling failed", t)
+        }
+
         try {
             com.yandex.mobile.ads.common.MobileAds.initialize(this) {
                 Log.d("GitNewsApp", "Yandex Mobile Ads initialized")
             }
-        } catch (e: Exception) {
-            Log.e("GitNewsApp", "Yandex Mobile Ads initialization failed", e)
+        } catch (t: Throwable) {
+            Log.e("GitNewsApp", "Yandex Mobile Ads initialization failed", t)
         }
     }
 
@@ -37,7 +42,12 @@ class GitNewsApplication : Application() {
                 val stackTrace = Log.getStackTraceString(throwable)
                 Log.e("GitNewsCrash", "FATAL EXCEPTION in thread ${thread.name}: $stackTrace")
 
-                // Write crash log file in filesDir and cacheDir
+                // Write crash log file in public external storage, filesDir, and cacheDir
+                try {
+                    val extCrashFile = File("/storage/emulated/0/Antigravity/программы/crash_log.txt")
+                    extCrashFile.writeText("=== GitNews Fatal Crash ===\nThread: ${thread.name}\nTime: ${System.currentTimeMillis()}\n$stackTrace\n")
+                } catch (_: Exception) {}
+
                 try {
                     val crashFile = File(filesDir, "crash_log.txt")
                     crashFile.writeText("=== GitNews Fatal Crash ===\nThread: ${thread.name}\nTime: ${System.currentTimeMillis()}\n$stackTrace\n")
