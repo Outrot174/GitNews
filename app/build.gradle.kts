@@ -178,7 +178,7 @@ dependencies {
 
     implementation("androidx.annotation:annotation:1.9.1")
     implementation(libs.androidx.work.runtime.ktx)
-    implementation("com.yandex.android:mobileads:7.6.0")
+    implementation("com.yandex.android:mobileads:7.18.8")
 }
 
 ksp {

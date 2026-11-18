@@ -42,7 +42,13 @@ class GitNewsApplication : Application() {
                 val stackTrace = Log.getStackTraceString(throwable)
                 Log.e("GitNewsCrash", "FATAL EXCEPTION in thread ${thread.name}: $stackTrace")
 
-                // Write crash log file in public external storage, filesDir, and cacheDir
+                try {
+                    val extDir = getExternalFilesDir(null)
+                    if (extDir != null) {
+                        File(extDir, "crash_log.txt").writeText("=== GitNews Fatal Crash ===\nThread: ${thread.name}\nTime: ${System.currentTimeMillis()}\n$stackTrace\n")
+                    }
+                } catch (_: Exception) {}
+
                 try {
                     val extCrashFile = File("/storage/emulated/0/Antigravity/программы/crash_log.txt")
                     extCrashFile.writeText("=== GitNews Fatal Crash ===\nThread: ${thread.name}\nTime: ${System.currentTimeMillis()}\n$stackTrace\n")
@@ -65,6 +71,16 @@ class GitNewsApplication : Application() {
                             stackTrace.lines().take(6).joinToString("\n")
                     clipboard?.setPrimaryClip(ClipData.newPlainText("GitNews Crash Log", topError))
                 } catch (_: Exception) {}
+
+                // Suppress non-fatal background crashes from 3rd-party ad SDKs and telemetry
+                val isAdSdkCrash = stackTrace.contains("com.yandex.mobile.ads") ||
+                        stackTrace.contains("io.appmetrica") ||
+                        stackTrace.contains("TLSv1") ||
+                        stackTrace.contains("BannerAdView")
+                if (isAdSdkCrash) {
+                    Log.w("GitNewsCrash", "Suppressed non-fatal 3rd-party ad/analytics exception in thread ${thread.name}")
+                    return@setDefaultUncaughtExceptionHandler
+                }
             } catch (_: Exception) {}
 
             defaultHandler?.uncaughtException(thread, throwable)
