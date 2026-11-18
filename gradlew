@@ -18,11 +18,13 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-export TMPDIR="${TMPDIR:-/data/user/0/com.agy/files/tmp}"
-export GRADLE_USER_HOME="${GRADLE_USER_HOME:-/data/user/0/com.agy/files/.gradle}"
-export GRADLE_OPTS="-Djava.io.tmpdir=$TMPDIR $GRADLE_OPTS"
-export JAVA_OPTS="-Djava.io.tmpdir=$TMPDIR $JAVA_OPTS"
-mkdir -p "$TMPDIR" "$GRADLE_USER_HOME" 2>/dev/null
+if [ -d "/data/user/0/com.agy" ]; then
+    export TMPDIR="${TMPDIR:-/data/user/0/com.agy/files/tmp}"
+    export GRADLE_USER_HOME="${GRADLE_USER_HOME:-/data/user/0/com.agy/files/.gradle}"
+    export GRADLE_OPTS="-Djava.io.tmpdir=$TMPDIR $GRADLE_OPTS"
+    export JAVA_OPTS="-Djava.io.tmpdir=$TMPDIR $JAVA_OPTS"
+    mkdir -p "$TMPDIR" "$GRADLE_USER_HOME" 2>/dev/null
+fi
 
 ##############################################################################
 #

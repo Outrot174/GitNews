@@ -1,5 +1,7 @@
-System.setProperty("org.sqlite.tmpdir", "/data/user/0/com.agy/files/tmp")
-System.setProperty("java.io.tmpdir", "/data/user/0/com.agy/files/tmp")
+if (file("/data/user/0/com.agy").exists()) {
+    System.setProperty("org.sqlite.tmpdir", "/data/user/0/com.agy/files/tmp")
+    System.setProperty("java.io.tmpdir", "/data/user/0/com.agy/files/tmp")
+}
 
 plugins {
     alias(libs.plugins.android.application) apply false
