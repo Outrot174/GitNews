@@ -63,3 +63,14 @@
 
 # Keep Attributes
 -keepattributes EnclosingMethod,InnerClasses,Signature,SourceFile,LineNumberTable
+
+# Keep Firebase & Google Play Services
+-keep class com.google.firebase.** { *; }
+-dontwarn com.google.firebase.**
+-keep class com.google.android.gms.** { *; }
+-dontwarn com.google.android.gms.**
+-keep class androidx.credentials.** { *; }
+-dontwarn androidx.credentials.**
+-keep class com.google.android.libraries.identity.googleid.** { *; }
+-dontwarn com.google.android.libraries.identity.googleid.**
+

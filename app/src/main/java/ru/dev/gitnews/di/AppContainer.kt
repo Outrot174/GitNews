@@ -79,7 +79,7 @@ class DefaultAppContainer(private val context: Context) : AppContainer {
     }
 
     override val authRepository: AuthRepository by lazy {
-        AuthRepositoryImpl(gitHubApiService, secureTokenStorage)
+        AuthRepositoryImpl(context, gitHubApiService, secureTokenStorage)
     }
 
     override val presetRepository: PresetRepository by lazy {

@@ -1,14 +1,10 @@
 package ru.dev.gitnews.ui.screens.auth
 
-import android.accounts.Account
-import android.accounts.AccountManager
 import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
@@ -95,6 +91,7 @@ fun AuthScreen(
     val isPasswordVisible by viewModel.isPasswordVisible.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
+    val resetMessage by viewModel.resetMessage.collectAsState()
 
     var isCodeCopied by remember { mutableStateOf(false) }
     var showPatInput by remember { mutableStateOf(false) }
@@ -102,18 +99,6 @@ fun AuthScreen(
 
     if (authState is AuthState.Authenticated) {
         onAuthSuccess()
-    }
-
-    // Google System Account Chooser Launcher
-    val googleAccountLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val accountName = result.data?.getStringExtra(AccountManager.KEY_ACCOUNT_NAME)
-            if (!accountName.isNullOrBlank()) {
-                viewModel.signInWithGoogleAccount(accountName)
-            }
-        }
     }
 
     Box(
@@ -170,6 +155,35 @@ fun AuthScreen(
                 }
             }
 
+            // Password Reset Confirmation Banner
+            AnimatedVisibility(visible = !resetMessage.isNullOrBlank()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(colors.surfaceElevated)
+                        .hairlineBorder(colors.signalEmerald.copy(alpha = 0.6f), RoundedCornerShape(8.dp))
+                        .padding(12.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Outlined.Check,
+                            contentDescription = null,
+                            tint = colors.signalEmerald,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = resetMessage ?: "",
+                            style = typography.caption.copy(
+                                color = colors.textPrimary,
+                                fontSize = 12.sp
+                            )
+                        )
+                    }
+                }
+            }
+
             // PROVIDER 1: Google 1-Tap Sign-In
             Box(
                 modifier = Modifier
@@ -180,21 +194,8 @@ fun AuthScreen(
                     .hairlineBorder(colors.borderSubtle, RoundedCornerShape(9999.dp))
                     .tactileClick {
                         viewModel.clearError()
-                        try {
-                            val intent = AccountManager.newChooseAccountIntent(
-                                null,
-                                null as ArrayList<Account>?,
-                                arrayOf("com.google"),
-                                null,
-                                null,
-                                null,
-                                null
-                            )
-                            googleAccountLauncher.launch(intent)
-                        } catch (_: Exception) {
-                            // If account picker cannot be invoked, prompt user via email
-                            viewModel.onEmailChanged("")
-                        }
+                        viewModel.clearResetMessage()
+                        viewModel.signInWithGoogle(context)
                     },
                 contentAlignment = Alignment.Center
             ) {
@@ -385,6 +386,29 @@ fun AuthScreen(
                             unfocusedContainerColor = colors.surfaceCanvas
                         )
                     )
+
+                    // "Забыли пароль?" text button in login mode
+                    if (!isRegisterMode) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            Text(
+                                text = "Забыли пароль?",
+                                style = typography.caption.copy(
+                                    color = colors.textSecondary,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium
+                                ),
+                                modifier = Modifier
+                                    .tactileClick {
+                                        focusManager.clearFocus()
+                                        viewModel.sendPasswordReset()
+                                    }
+                                    .padding(vertical = 2.dp)
+                            )
+                        }
+                    }
 
                     // Action Button (Вход / Регистрация)
                     Box(

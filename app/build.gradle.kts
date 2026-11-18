@@ -20,6 +20,10 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 android {
     namespace = "ru.dev.gitnews"
     compileSdk = 36
@@ -179,6 +183,16 @@ dependencies {
     implementation("androidx.annotation:annotation:1.9.1")
     implementation(libs.androidx.work.runtime.ktx)
     implementation("com.yandex.android:mobileads:7.18.8")
+
+    // Firebase Authentication & Play Services
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.kotlinx.coroutines.play.services)
+
+    // AndroidX Credentials & Google ID
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
 }
 
 ksp {
