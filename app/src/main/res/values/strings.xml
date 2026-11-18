@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">GitNews</string>
+    <string name="tab_feed">Лента</string>
+    <string name="tab_search">Поиск</string>
+    <string name="tab_bookmarks">Избранное</string>
+    <string name="tab_profile">Профиль</string>
+</resources>
