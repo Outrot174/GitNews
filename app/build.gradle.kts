@@ -8,7 +8,7 @@ if (file("/data/user/0/com.agy").exists()) {
 val localProperties = Properties().apply {
     val localPropertiesFile = rootProject.file("local.properties")
     if (localPropertiesFile.exists()) {
-        localPropertiesFile.inputStream().use { load(it) }
+        localPropertiesFile.reader(Charsets.UTF_8).use { load(it) }
     }
 }
 
@@ -44,8 +44,16 @@ android {
                 ?: System.getenv("RELEASE_KEY_PASSWORD")
                 ?: System.getenv("KEY_PASSWORD")
 
-            if (!keystorePath.isNullOrBlank() && file(keystorePath).exists()) {
-                storeFile = file(keystorePath)
+            val keystoreFile = when {
+                keystorePath.isNullOrBlank() -> null
+                rootProject.file(keystorePath).exists() -> rootProject.file(keystorePath)
+                file(keystorePath).exists() -> file(keystorePath)
+                File(keystorePath).exists() -> File(keystorePath)
+                else -> null
+            }
+
+            if (keystoreFile != null && keystoreFile.exists()) {
+                storeFile = keystoreFile
                 storePassword = keystorePassword
                 this.keyAlias = keyAlias
                 this.keyPassword = keyPassword
